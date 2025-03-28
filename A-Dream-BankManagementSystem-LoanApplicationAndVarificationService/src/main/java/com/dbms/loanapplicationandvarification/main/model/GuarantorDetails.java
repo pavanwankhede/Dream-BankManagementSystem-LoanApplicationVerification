@@ -33,9 +33,6 @@ public class GuarantorDetails {
 	    @Size(min = 3, max = 50, message = "Guarantor relation must be between 3 and 50 characters.")
 	    private String guarantorRelation;
 
-	    @NotNull(message = "Address must not be null.")
-	    private String address;
-
 	    @NotNull(message = "Date of birth must not be null.")
 	    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Date of birth must be in the format yyyy-MM-dd.")
 	    private String dateOfBirth;  // Format: yyyy-MM-dd

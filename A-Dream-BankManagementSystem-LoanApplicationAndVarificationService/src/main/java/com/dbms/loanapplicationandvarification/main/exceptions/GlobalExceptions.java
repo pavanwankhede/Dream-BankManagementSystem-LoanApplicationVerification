@@ -12,7 +12,6 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
 import com.dbms.loanapplicationandvarification.main.dto.ErrorResponseDTO;
 
 @RestControllerAdvice
@@ -42,4 +41,15 @@ public class GlobalExceptions {
 	    return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
+	 @ExceptionHandler(ValidationExceptions.class)
+	    public ResponseEntity<ErrorResponseDTO> handleValidationException(ValidationExceptions ex) {
+	        Map<String, String> errors = ex.getErrors();
+
+	        // Create a formatted error response
+	        ErrorResponseDTO errorResponse = new ErrorResponseDTO("Validation Failed");
+	        errorResponse.setMessage(errors.toString()); // Convert map to string for display
+
+	        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+	    }
+	
 }

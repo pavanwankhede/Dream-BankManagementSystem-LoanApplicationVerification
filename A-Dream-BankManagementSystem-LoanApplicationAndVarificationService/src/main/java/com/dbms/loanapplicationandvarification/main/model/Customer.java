@@ -1,6 +1,4 @@
 package com.dbms.loanapplicationandvarification.main.model;
-
-import java.sql.Date;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,8 +6,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -45,8 +41,9 @@ public class Customer {
        @Pattern(regexp = "^[A-Za-z ]+$", message = "Customer lastName Must Contain Only Letters And Spaces")
     private String lastName;
  
-    @Temporal(TemporalType.DATE)
-    private Date dateOfBirth;
+    @NotNull(message = "Date of Birth must not be null.")
+    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Date of Birth must be in the format yyyy-MM-dd.")
+    private String dateOfBirth;
     
     @Min(value = 18, message = "Age Must Be At Least 18/ year. Please Enter Valid Age")
 	 @Max(value = 60, message = "Age Must be At Most 60/ year. Please Enter Valid Age")
@@ -82,7 +79,7 @@ public class Customer {
     @OneToOne(cascade = CascadeType.ALL)
     private AccountDetails accountDetails;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.MERGE)
     private CibilScore cibilScore;
 
     @OneToOne(cascade = CascadeType.ALL)
