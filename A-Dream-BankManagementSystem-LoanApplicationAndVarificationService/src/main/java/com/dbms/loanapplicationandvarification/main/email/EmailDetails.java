@@ -37,7 +37,6 @@ public class EmailDetails {
 		            "💰 **Loan Amount**: " + customer.getTotalLoanRequired() + "\n" +
 		            "📅 **Application Date**: " + customerVerification.getVerificationDate() + "\n" +
 		            "📅 **Application Time**: " + customerVerification.getVerificationTime() + "\n" +
-		            "📊 **Verification Status**: " + customerVerification.getVerificationStatus().name() + "\n" +
 		            "📢 **Remarks**: " + customerVerification.getRemark() + "\n\n" +
 		            "📌 **Customer Details**:\n" +
 		            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
