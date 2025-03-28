@@ -4,17 +4,22 @@ import java.io.IOException;
 import java.sql.Time;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.dbms.loanapplicationandvarification.main.email.EmailDetails;
 import com.dbms.loanapplicationandvarification.main.email.VerificationRemarkGenerator;
 import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
+import com.dbms.loanapplicationandvarification.main.exceptions.CustomerNotFoundException;
 import com.dbms.loanapplicationandvarification.main.exceptions.ValidationExceptions;
 import com.dbms.loanapplicationandvarification.main.model.AllPersonalDocuments;
 import com.dbms.loanapplicationandvarification.main.model.Customer;
@@ -117,7 +122,43 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 	        }
 
 	    }
-	    
+
+
+		@Override
+		public List<Customer> getAllCustomerData() {
+			log.info("Fetching all Customer Data.");
+			return customerRepository.findAll();
+		}
+
+
+		@Override
+		public Customer getCustomerById(int id) {
+			Optional<Customer> customer=customerRepository.findById(id);
+			if(customer.isEmpty())
+			{
+				throw new CustomerNotFoundException("Custmoer For This ID Is Not Found"+id);
+			}
+			return customer.get();
+		}
+		
+
+		@Override
+		public int deleteCustomerByIdAndStatus(int customerid, VerificationStatus status) {
+			// Ensure only REJECTED Customer are deleted
+		    if (status != VerificationStatus.REJECTED) {
+		        log.warn("Invalid status for deletion: {}. Only REJECTED Customer can be deleted.", status);
+		        return 0; // No deletion happens if status is not REJECTED
+		                
+		    }else
+		    {
+		    	 log.info("Deleting customer with ID {} and status {}", customerid, status);
+		    	 return customerRepository.deleteByCustomerIdAndVerificationStatus(customerid,status);
+		    }
+		   
+		}
+
+
+		
 }
 
 

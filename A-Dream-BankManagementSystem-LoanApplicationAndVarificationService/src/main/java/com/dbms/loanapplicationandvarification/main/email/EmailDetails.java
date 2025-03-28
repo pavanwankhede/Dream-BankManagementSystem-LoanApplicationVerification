@@ -8,6 +8,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
 import com.dbms.loanapplicationandvarification.main.model.Customer;
 import com.dbms.loanapplicationandvarification.main.model.CustomerAddress;
 import com.dbms.loanapplicationandvarification.main.model.CustomerVerification;
@@ -71,5 +72,47 @@ public class EmailDetails {
 
 		    log.info("Loan verification email sent to {}", customer.getEmailId());
 		}
+	public void sendCustomerVerificationStatusUpdate(Customer customer, VerificationStatus status) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(FROM_MAIL);
+        message.setTo(customer.getEmailId());
+        message.setSubject("Loan Application Status Update - " + customer.getCustomerId());
 
+        String emailContent;
+
+        if (status == VerificationStatus.APPROVED) {
+            emailContent =
+                "Dear " + customer.getFirstName() + ",\n\n" +
+                "🎉 Congratulations! 🎉 Your loan application has been **APPROVED**.\n\n" +
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                "🆔 Customer ID: " + customer.getCustomerId() + "\n" +
+                "📞 Contact No: " + customer.getMobileNo() + "\n" +
+                "✅ New Status: " + status.toString() + "\n\n" +
+                "📢 Next Steps: Our team will contact you shortly with further loan processing details.\n\n" +
+                "Best Regards,\n" +
+                "📧 Customer Support Team\n" +
+                "🏦 BankFinancial Services\n\n" +
+                "✨ Thank You for Choosing Us! ✨";
+        } else if (status == VerificationStatus.REJECTED) {
+            emailContent =
+                "Dear " + customer.getFirstName() + ",\n\n" +
+                "We regret to inform you that your loan application has been **REJECTED**.\n\n" +
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                "🆔 Customer ID: " + customer.getCustomerId() + "\n" +
+                "📞 Contact No: " + customer.getMobileNo() + "\n" +
+                "❌ New Status: " + status.toString() + "\n\n" +
+                "📢 Possible Reasons: Low CIBIL score, incomplete documents, or ineligibility.\n" +
+                "💡 Next Steps: You may reapply after improving your eligibility.\n\n" +
+                "Best Regards,\n" +
+                "📧 Customer Support Team\n" +
+                "🏦 BankFinancial Services\n\n" +
+                "🔄 We Appreciate Your Interest & Look Forward to Serving You Again! 🔄";
+        } else {
+            return; // No email needed for other statuses
+        }
+
+        message.setText(emailContent);
+        sender.send(message);
+        System.out.println("Verification status update email sent to " + customer.getEmailId());
+    }
 }
