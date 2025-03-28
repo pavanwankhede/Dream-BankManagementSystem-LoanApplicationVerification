@@ -51,5 +51,11 @@ public class GlobalExceptions {
 
 	        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
 	    }
+	 
+	 @ExceptionHandler(CustomerNotFoundException.class)
+		public ResponseEntity<ErrorResponseDTO> handleEnquiryNotFoundException( CustomerNotFoundException e) {
+		    ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
+		    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+		}
 	
 }

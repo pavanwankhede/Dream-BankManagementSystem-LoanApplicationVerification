@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -80,7 +81,15 @@ public class LoanApplicationVerificationController {
 		return new ResponseEntity<List<Customer>>(list,HttpStatus.OK);
 	}
 	
-	
+	@GetMapping("/getByCustomerId/{customerId}")
+	public ResponseEntity<Customer> getByCustomerId(@PathVariable("customerId") int id){
+		
+		 log.info("Received request to fetch data By Customer ID.");
+		 Customer customer= appvarificationServiceI.getCustomerById(id);
+		 log.info("Successfully fetched {} Customer Data By Id.", id);
+		 return new ResponseEntity<Customer>(customer,HttpStatus.OK);
+	   
+	}
 	
 	
 	

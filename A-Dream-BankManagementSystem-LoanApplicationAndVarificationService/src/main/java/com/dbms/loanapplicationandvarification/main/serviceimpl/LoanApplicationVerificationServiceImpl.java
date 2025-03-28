@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.dbms.loanapplicationandvarification.main.email.EmailDetails;
 import com.dbms.loanapplicationandvarification.main.email.VerificationRemarkGenerator;
 import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
+import com.dbms.loanapplicationandvarification.main.exceptions.CustomerNotFoundException;
 import com.dbms.loanapplicationandvarification.main.exceptions.ValidationExceptions;
 import com.dbms.loanapplicationandvarification.main.model.AllPersonalDocuments;
 import com.dbms.loanapplicationandvarification.main.model.Customer;
@@ -124,6 +126,17 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 		public List<Customer> getAllCustomerData() {
 			log.info("Fetching all Customer Data.");
 			return customerRepository.findAll();
+		}
+
+
+		@Override
+		public Customer getCustomerById(int id) {
+			Optional<Customer> customer=customerRepository.findById(id);
+			if(customer.isEmpty())
+			{
+				throw new CustomerNotFoundException("Custmoer For This ID Is Not Found"+id);
+			}
+			return customer.get();
 		}
 	    
 }

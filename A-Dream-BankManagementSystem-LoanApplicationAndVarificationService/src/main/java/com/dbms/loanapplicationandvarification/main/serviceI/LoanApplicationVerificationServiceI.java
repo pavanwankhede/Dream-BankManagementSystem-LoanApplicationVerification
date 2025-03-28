@@ -16,4 +16,6 @@ public interface LoanApplicationVerificationServiceI {
 
 	public List<Customer> getAllCustomerData();
 
+	public Customer getCustomerById(int id);
+
 }
