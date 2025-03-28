@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Time;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -117,6 +118,13 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 	        }
 
 	    }
+
+
+		@Override
+		public List<Customer> getAllCustomerData() {
+			log.info("Fetching all Customer Data.");
+			return customerRepository.findAll();
+		}
 	    
 }
 
