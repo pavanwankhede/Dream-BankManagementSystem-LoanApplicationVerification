@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.dbms.loanapplicationandvarification.main.email.EmailDetails;
 import com.dbms.loanapplicationandvarification.main.model.AllPersonalDocuments;
 import com.dbms.loanapplicationandvarification.main.model.Customer;
 import com.dbms.loanapplicationandvarification.main.repository.AccountDetailsRepository;
@@ -33,6 +34,8 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 	 @Autowired
 	    private CustomerRepository customerRepository;
 	    
+	 @Autowired
+	 EmailDetails email;
 	    @Autowired
 	    private AllPersonalDocumentsRepository documentsRepository;
 
@@ -63,6 +66,15 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 
 	            // Save Customer Data
 	            Customer savedCustomer = customerRepository.save(customerData);
+	            if(savedCustomer !=null) {
+	            	try {
+	            	
+	            		email.sendLoanVerificationEmail(savedCustomer,savedCustomer.getCustomerVerification(), savedCustomer.getCustomerAddress());
+	            		log.info("Loan Verification confirmation email sent successfully.");
+		            } catch (Exception e) {
+		                log.error("Failed to send Loan Verification confirmation email: {}", e.getMessage(), e);
+		            }
+	            }
 	            log.info("Customer data saved successfully with ID: {}", savedCustomer.getCustomerId());
 
 	            return savedCustomer;
