@@ -96,7 +96,7 @@ public class LoanApplicationVerificationController {
 	}
 	
 	@DeleteMapping("/deleteById/{customerId}/{verificationStatus}")
-	public ResponseEntity<String> deleteByStatus(@PathVariable("customerId") int customerid,
+	public ResponseEntity<String> deleteRejectedApplication(@PathVariable("customerId") int customerid,
 			@PathVariable("verificationStatus") VerificationStatus status)
 	{
 		log.info("Request received to delete Customer with ID: {} and status: {}", customerid, status);
