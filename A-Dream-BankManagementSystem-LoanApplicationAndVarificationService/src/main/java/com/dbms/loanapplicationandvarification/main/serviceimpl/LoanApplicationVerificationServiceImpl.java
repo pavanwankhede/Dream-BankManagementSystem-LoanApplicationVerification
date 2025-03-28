@@ -1,35 +1,38 @@
 package com.dbms.loanapplicationandvarification.main.serviceimpl;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.dbms.loanapplicationandvarification.main.email.EmailDetails;
+import com.dbms.loanapplicationandvarification.main.email.VerificationRemarkGenerator;
+import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
+import com.dbms.loanapplicationandvarification.main.exceptions.ValidationExceptions;
 import com.dbms.loanapplicationandvarification.main.model.AllPersonalDocuments;
 import com.dbms.loanapplicationandvarification.main.model.Customer;
-import com.dbms.loanapplicationandvarification.main.repository.AccountDetailsRepository;
+import com.dbms.loanapplicationandvarification.main.model.CustomerVerification;
 import com.dbms.loanapplicationandvarification.main.repository.AllPersonalDocumentsRepository;
-import com.dbms.loanapplicationandvarification.main.repository.CibilScoreRepository;
-import com.dbms.loanapplicationandvarification.main.repository.CustomerAddressRepository;
 import com.dbms.loanapplicationandvarification.main.repository.CustomerRepository;
-import com.dbms.loanapplicationandvarification.main.repository.CustomerVarificationRepository;
-import com.dbms.loanapplicationandvarification.main.repository.DependentInfoRepository;
-import com.dbms.loanapplicationandvarification.main.repository.GuarantorDetailsRepository;
-import com.dbms.loanapplicationandvarification.main.repository.LocalAddressRepository;
-import com.dbms.loanapplicationandvarification.main.repository.PermanentAddressRepository;
 import com.dbms.loanapplicationandvarification.main.serviceI.LoanApplicationVerificationServiceI;
-
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validator;
 
 
 
 @Service
 public class LoanApplicationVerificationServiceImpl implements LoanApplicationVerificationServiceI{
+	
+	
+	@Autowired
+	private Validator validator;
 	
 	 @Autowired
 	    private CustomerRepository customerRepository;
@@ -46,6 +49,8 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 	                                     MultipartFile panCard, MultipartFile aadharCard, MultipartFile incomeTaxCertificate,
 	                                     MultipartFile salarySlip, MultipartFile signaturePhoto) {
 	        try {
+	        	 validateUser(customerData);
+	        	 
 	            log.info("Processing new customer data...");
 
 	            // Create and set document details
@@ -63,17 +68,28 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 
 	            // Set saved documents to the customer object
 	            customerData.setAllPersonalDocuments(savedDocs); // Replace with actual method name in Customer class
+                  
+	            
+	         // **Create and attach CustomerVerification object**
+	            CustomerVerification verification = new CustomerVerification();
+	            verification.setVerificationStatus(VerificationStatus.PENDING);
+	            verification.setRemark(VerificationRemarkGenerator.generateRemark(VerificationStatus.PENDING));
+	            verification.setVerificationDate(new Date());  
+	            verification.setVerificationTime(new Time(System.currentTimeMillis())); 
 
+	            // **Attach verification to customer**
+	            customerData.setCustomerVerification(verification);
+ 
 	            // Save Customer Data
 	            Customer savedCustomer = customerRepository.save(customerData);
 	            if(savedCustomer !=null) {
 	            	try {
 	            	
-	            		email.sendLoanVerificationEmail(savedCustomer,savedCustomer.getCustomerVerification(), savedCustomer.getCustomerAddress());
-	            		log.info("Loan Verification confirmation email sent successfully.");
-		            } catch (Exception e) {
-		                log.error("Failed to send Loan Verification confirmation email: {}", e.getMessage(), e);
-		            }
+	  email.sendLoanVerificationEmail(savedCustomer,savedCustomer.getCustomerVerification(), savedCustomer.getCustomerAddress());
+	       		log.info("Loan Verification confirmation email sent successfully.");
+		         } catch (Exception e) {
+		              log.error("Failed to send Loan Verification confirmation email: {}", e.getMessage(), e);
+		     }
 	            }
 	            log.info("Customer data saved successfully with ID: {}", savedCustomer.getCustomerId());
 
@@ -88,6 +104,20 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 	        }
 	    }
 	
+	    
+	    private void validateUser(Customer customer) {
+	        Set<ConstraintViolation<Customer>> violations = validator.validate(customer);
+	        
+	        if (!violations.isEmpty()) {
+	            Map<String, String> errors = new HashMap<>();
+	            for (ConstraintViolation<Customer> violation : violations) {
+	                errors.put(violation.getPropertyPath().toString(), violation.getMessage());
+	            }
+	            throw new ValidationExceptions(errors); // Throw custom validation exception
+	        }
+
+	    }
+	    
 }
 
 
