@@ -24,7 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
+import com.dbms.loanapplicationandvarification.main.exceptions.EntityNotFoundException;
 import com.dbms.loanapplicationandvarification.main.model.Customer;
+import com.dbms.loanapplicationandvarification.main.model.CustomerVerification;
 import com.dbms.loanapplicationandvarification.main.serviceI.LoanApplicationVerificationServiceI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -95,23 +97,39 @@ public class LoanApplicationVerificationController {
 	   
 	}
 	
-	@DeleteMapping("/deleteById/{customerId}/{verificationStatus}")
-	public ResponseEntity<String> deleteRejectedApplication(@PathVariable("customerId") int customerid,
-			@PathVariable("verificationStatus") VerificationStatus status)
-	{
-		log.info("Request received to delete Customer with ID: {} and status: {}", customerid, status);
+	@PatchMapping("/updateVerificationStatus/{verificationId}/{status}")
+	public ResponseEntity<String> updateVerificationStatus(
+	        @PathVariable int verificationId,
+	        @PathVariable VerificationStatus status) {
 
-	    
+	    log.info("Received request to update verification status for ID: {}", verificationId);
 
-	    int deletedCount = appvarificationServiceI.deleteCustomerByIdAndStatus(customerid, status);
+	    try {
+	        boolean updated = appvarificationServiceI.updateVerificationStatus(verificationId, status);
 
-	    if (deletedCount > 0) {
-	        log.info("Customer with ID {} and status {} deleted successfully", customerid, status);
-	        return ResponseEntity.ok("Deleted REJECTED enquiry with ID " + customerid);
+	        if (updated) {
+	            return ResponseEntity.ok("Updated verification status for ID: " + verificationId);
+	        } else {
+	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                    .body("No verification record found for ID: " + verificationId);
+	        }
+	    } catch (EntityNotFoundException e) {
+	        log.error("Error updating verification status: {}", e.getMessage());
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	}
+	}
+	
+	@DeleteMapping("/deleteById/{customerId}")
+	public ResponseEntity<String> deleteRejectedApplication(@PathVariable("customerId") int customerId) {
+	    log.info("Request received to delete Customer with ID: {} and status: REJECTED", customerId);
+
+	    boolean deleted = appvarificationServiceI.deleteCustomerByIdAndStatus(customerId, VerificationStatus.REJECTED);
+
+	    if (deleted) {
+	        return ResponseEntity.ok("Deleted customer with ID: " + customerId + " and all related data.");
+	    } else {
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+	                .body("No customer with REJECTED status found for the given ID.");
 	    }
-
-	    log.warn("No REJECTED Customer found with the given ID: {}", customerid);
-	    return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	            .body("No REJECTED Customer found with the given ID");
 	}
 }

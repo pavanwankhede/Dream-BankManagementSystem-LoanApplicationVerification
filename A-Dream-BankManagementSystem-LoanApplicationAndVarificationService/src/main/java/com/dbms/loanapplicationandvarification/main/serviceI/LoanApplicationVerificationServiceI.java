@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
 import com.dbms.loanapplicationandvarification.main.model.Customer;
+import com.dbms.loanapplicationandvarification.main.model.CustomerVerification;
 
 import jakarta.validation.Valid;
 
@@ -19,8 +20,12 @@ public interface LoanApplicationVerificationServiceI {
 
 	public Customer getCustomerById(int id);
 
-	public int deleteCustomerByIdAndStatus(int customerid, VerificationStatus status);
+	// public CustomerVerification updateVerificationStatus(int verificationId, VerificationStatus status);
 
-	
+	public boolean deleteCustomerByIdAndStatus(int customerId, VerificationStatus status);
+
+	public boolean updateVerificationStatus(int verificationId, VerificationStatus status);
+
+
 
 }

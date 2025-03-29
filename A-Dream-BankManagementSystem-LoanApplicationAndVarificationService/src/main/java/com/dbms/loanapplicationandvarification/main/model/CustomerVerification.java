@@ -5,12 +5,14 @@ import java.util.Date;
 
 import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -30,7 +32,7 @@ import lombok.NoArgsConstructor;
 public class CustomerVerification {
 	 @Id
 	    @GeneratedValue(strategy = GenerationType.IDENTITY)
-	    private Long id;
+	    private int verificationId;
 			 
 	   @Enumerated(EnumType.STRING)  // Ensure Enum is stored as String
 	    @NotNull(message = "Verification status must not be null.")
@@ -44,6 +46,9 @@ public class CustomerVerification {
 			
 		 @Temporal(TemporalType.TIME)
 			private Time verificationTime;
+		 
+		 @ManyToOne(cascade = CascadeType.ALL)
+		    private Customer customer;
 	   
 	    
 		/*

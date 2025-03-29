@@ -20,13 +20,18 @@ import com.dbms.loanapplicationandvarification.main.email.EmailDetails;
 import com.dbms.loanapplicationandvarification.main.email.VerificationRemarkGenerator;
 import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
 import com.dbms.loanapplicationandvarification.main.exceptions.CustomerNotFoundException;
+import com.dbms.loanapplicationandvarification.main.exceptions.EntityNotFoundException;
 import com.dbms.loanapplicationandvarification.main.exceptions.ValidationExceptions;
 import com.dbms.loanapplicationandvarification.main.model.AllPersonalDocuments;
 import com.dbms.loanapplicationandvarification.main.model.Customer;
+import com.dbms.loanapplicationandvarification.main.model.CustomerAddress;
 import com.dbms.loanapplicationandvarification.main.model.CustomerVerification;
 import com.dbms.loanapplicationandvarification.main.repository.AllPersonalDocumentsRepository;
 import com.dbms.loanapplicationandvarification.main.repository.CustomerRepository;
+import com.dbms.loanapplicationandvarification.main.repository.CustomerVarificationRepository;
 import com.dbms.loanapplicationandvarification.main.serviceI.LoanApplicationVerificationServiceI;
+
+import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
@@ -35,15 +40,19 @@ import jakarta.validation.Validator;
 @Service
 public class LoanApplicationVerificationServiceImpl implements LoanApplicationVerificationServiceI{
 	
+    
+ @Autowired
+ EmailDetails email;
 	
 	@Autowired
 	private Validator validator;
 	
 	 @Autowired
 	    private CustomerRepository customerRepository;
-	    
+
 	 @Autowired
-	 EmailDetails email;
+	 private CustomerVarificationRepository varificationRepository;
+	 
 	    @Autowired
 	    private AllPersonalDocumentsRepository documentsRepository;
 
@@ -136,29 +145,45 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 			Optional<Customer> customer=customerRepository.findById(id);
 			if(customer.isEmpty())
 			{
-				throw new CustomerNotFoundException("Custmoer For This ID Is Not Found"+id);
+				throw new CustomerNotFoundException("Custmoer For This ID Is Not Found : " +id);
 			}
 			return customer.get();
 		}
 		
-
+		
 		@Override
-		public int deleteCustomerByIdAndStatus(int customerid, VerificationStatus status) {
-			// Ensure only REJECTED Customer are deleted
-		    if (status != VerificationStatus.REJECTED) {
-		        log.warn("Invalid status for deletion: {}. Only REJECTED Customer can be deleted.", status);
-		        return 0; // No deletion happens if status is not REJECTED
-		                
-		    }else
-		    {
-		    	 log.info("Deleting customer with ID {} and status {}", customerid, status);
-		    	 return customerRepository.deleteByCustomerIdAndVerificationStatus(customerid,status);
+		public boolean updateVerificationStatus(int verificationId, VerificationStatus newStatus) {
+			
+		    CustomerVerification verification = varificationRepository.findById(verificationId)
+		        .orElseThrow(() -> new EntityNotFoundException("Verification record not found for ID: " + verificationId));
+
+		    verification.setVerificationStatus(newStatus);
+		    varificationRepository.save(verification);
+
+		    if (verification.getCustomer() != null) {
+		        Customer customer = verification.getCustomer();
+		        email.sendCustomerVerificationStatusUpdate(customer, newStatus);
+		        log.info("Status update email sent for customer ID: {}", customer.getCustomerId());
+		    } else {
+		        log.warn("No associated customer found for verification ID: {}", verificationId);
 		    }
-		   
+
+		    return true;
+		}
+		
+		@Override
+		@Transactional
+		public boolean deleteCustomerByIdAndStatus(int customerId, VerificationStatus status) {
+		    Customer customer = customerRepository.findById(customerId).orElse(null);
+
+		    if (customer == null || !customer.getCustomerVerification().getVerificationStatus().equals(status)) {
+		        log.warn("No REJECTED customer found with ID {}", customerId);
+		        return false;
+		    }
+
+		    log.info("Deleting customer with ID {} and related data.", customerId);
+		    customerRepository.delete(customer);  // Deletes customer and all related data due to cascading
+		    return true;
 		}
 
-
-		
 }
-
-
