@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -96,27 +97,19 @@ public class LoanApplicationVerificationController {
 		 return new ResponseEntity<Customer>(customer,HttpStatus.OK);
 	   
 	}
-	
-	@PatchMapping("/updateVerificationStatus/{verificationId}/{status}")
+	@PatchMapping("/changeStatus/{verificationId}/{verificationStatus}")
 	public ResponseEntity<String> updateVerificationStatus(
 	        @PathVariable int verificationId,
-	        @PathVariable VerificationStatus status) {
+	        @PathVariable VerificationStatus verificationStatus) {
 
-	    log.info("Received request to update verification status for ID: {}", verificationId);
+	    boolean updated = appvarificationServiceI.updateVerificationStatus(verificationId, verificationStatus);
 
-	    try {
-	        boolean updated = appvarificationServiceI.updateVerificationStatus(verificationId, status);
-
-	        if (updated) {
-	            return ResponseEntity.ok("Updated verification status for ID: " + verificationId);
-	        } else {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                    .body("No verification record found for ID: " + verificationId);
-	        }
-	    } catch (EntityNotFoundException e) {
-	        log.error("Error updating verification status: {}", e.getMessage());
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-	}
+	    if (updated) {
+	        return ResponseEntity.ok("Verification status updated successfully.");
+	    } else {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("Failed to update verification status.");
+	    }
 	}
 	
 	@DeleteMapping("/deleteById/{customerId}")

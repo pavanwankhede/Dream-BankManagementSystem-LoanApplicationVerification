@@ -150,30 +150,28 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 			return customer.get();
 		}
 		
-		
 		@Override
 		public boolean updateVerificationStatus(int verificationId, VerificationStatus newStatus) {
-			
-			  CustomerVerification verification = varificationRepository.findById(verificationId)
-				        .orElseThrow(() -> new EntityNotFoundException("Verification record not found for ID: " + verificationId));
+		    CustomerVerification verification = varificationRepository.findById(verificationId)
+		        .orElseThrow(() -> new EntityNotFoundException("Verification record not found for ID: " + verificationId));
 
-				    verification.setVerificationStatus(newStatus);
-				    varificationRepository.save(verification);
-				    
-				    Customer customer = verification.getCustomer();
-				    if (customer != null) {
-				        try {
-				            email.sendCustomerVerificationStatusUpdate(customer, newStatus);
-				            log.info(" Status update email sent to Customer ID: {}", customer.getCustomerId());
-				        } catch (Exception e) {
-				            log.error("❌ Failed to send status update email for Customer ID: {}. Error: {}", customer.getCustomerId(), e.getMessage());
-				        }
-				    } else {
-				        log.warn("No associated customer found for verification ID: {}", verificationId);
-				    }
+		    verification.setVerificationStatus(newStatus);
+		    varificationRepository.save(verification);
 
-				    return true;
+		    Optional<Customer> customerOpt = varificationRepository.findCustomerByVerificationId(verificationId);
+
+		    customerOpt.ifPresent(customer -> {
+		        try {
+		            email.sendCustomerVerificationStatusUpdate(customer, newStatus);
+		            log.info("Status update email sent to Customer ID: {}", customer.getCustomerId());
+		        } catch (Exception e) {
+		            log.error("Failed to send status update email for Customer ID: {}. Error: {}", customer.getCustomerId(), e.getMessage());
+		        }
+		    });
+
+		    return true;
 		}
+	
 		
 		@Override
 		@Transactional
