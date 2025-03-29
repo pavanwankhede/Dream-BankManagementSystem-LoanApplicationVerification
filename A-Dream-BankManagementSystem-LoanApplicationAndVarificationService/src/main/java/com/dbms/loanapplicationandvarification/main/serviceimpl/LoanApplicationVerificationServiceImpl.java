@@ -154,21 +154,25 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 		@Override
 		public boolean updateVerificationStatus(int verificationId, VerificationStatus newStatus) {
 			
-		    CustomerVerification verification = varificationRepository.findById(verificationId)
-		        .orElseThrow(() -> new EntityNotFoundException("Verification record not found for ID: " + verificationId));
+			  CustomerVerification verification = varificationRepository.findById(verificationId)
+				        .orElseThrow(() -> new EntityNotFoundException("Verification record not found for ID: " + verificationId));
 
-		    verification.setVerificationStatus(newStatus);
-		    varificationRepository.save(verification);
+				    verification.setVerificationStatus(newStatus);
+				    varificationRepository.save(verification);
+				    
+				    Customer customer = verification.getCustomer();
+				    if (customer != null) {
+				        try {
+				            email.sendCustomerVerificationStatusUpdate(customer, newStatus);
+				            log.info(" Status update email sent to Customer ID: {}", customer.getCustomerId());
+				        } catch (Exception e) {
+				            log.error("❌ Failed to send status update email for Customer ID: {}. Error: {}", customer.getCustomerId(), e.getMessage());
+				        }
+				    } else {
+				        log.warn("No associated customer found for verification ID: {}", verificationId);
+				    }
 
-		    if (verification.getCustomer() != null) {
-		        Customer customer = verification.getCustomer();
-		        email.sendCustomerVerificationStatusUpdate(customer, newStatus);
-		        log.info("Status update email sent for customer ID: {}", customer.getCustomerId());
-		    } else {
-		        log.warn("No associated customer found for verification ID: {}", verificationId);
-		    }
-
-		    return true;
+				    return true;
 		}
 		
 		@Override
