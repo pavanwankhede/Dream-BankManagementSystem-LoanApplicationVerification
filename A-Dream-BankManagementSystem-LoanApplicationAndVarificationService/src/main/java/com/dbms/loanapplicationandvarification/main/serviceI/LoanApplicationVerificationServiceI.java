@@ -26,6 +26,12 @@ public interface LoanApplicationVerificationServiceI {
 
 	public boolean updateVerificationStatus(int verificationId, VerificationStatus status);
 
+	public Customer updateCustomerData(int customerId, Customer updatedCustomerData, MultipartFile passportPhoto,
+			MultipartFile addressProof, MultipartFile panCard, MultipartFile aadharCard,
+			MultipartFile incomeTaxCertificate, MultipartFile salarySlip, MultipartFile signaturePhoto);
+
+	public List<Customer> getByCustomerStatus(VerificationStatus verificationStatus);
+
 
 
 }

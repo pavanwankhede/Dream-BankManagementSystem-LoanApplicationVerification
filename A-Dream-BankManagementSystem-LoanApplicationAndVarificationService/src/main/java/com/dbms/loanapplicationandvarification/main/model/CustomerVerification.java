@@ -11,7 +11,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -46,13 +48,7 @@ public class CustomerVerification {
 		 @Temporal(TemporalType.TIME)
 			private Time verificationTime;
 		 
-		 @ManyToOne(cascade = CascadeType.ALL)
-		    private Customer customer;
-	   
-	    
-		/*
-		 * @OneToOne(cascade = CascadeType.ALL) private AllPersonalDocuments
-		 * allPersonalDocuments;
-		 */
+
+		 
 
 }

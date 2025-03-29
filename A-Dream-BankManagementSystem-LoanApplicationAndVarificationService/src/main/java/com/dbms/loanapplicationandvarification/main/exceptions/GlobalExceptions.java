@@ -57,5 +57,10 @@ public class GlobalExceptions {
 		    ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
 		    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
 		}
+	 @ExceptionHandler(NoCustomerFoundForVerificationStatusException.class)
+		public ResponseEntity<ErrorResponseDTO> handleException(NoCustomerFoundForVerificationStatusException e) {
+		    ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
+		    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+		}
 	
 }

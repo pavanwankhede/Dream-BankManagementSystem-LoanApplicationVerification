@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -96,27 +97,19 @@ public class LoanApplicationVerificationController {
 		 return new ResponseEntity<Customer>(customer,HttpStatus.OK);
 	   
 	}
-	
-	@PatchMapping("/updateVerificationStatus/{verificationId}/{status}")
+	@PatchMapping("/changeStatus/{verificationId}/{verificationStatus}")
 	public ResponseEntity<String> updateVerificationStatus(
 	        @PathVariable int verificationId,
-	        @PathVariable VerificationStatus status) {
+	        @PathVariable VerificationStatus verificationStatus) {
 
-	    log.info("Received request to update verification status for ID: {}", verificationId);
+	    boolean updated = appvarificationServiceI.updateVerificationStatus(verificationId, verificationStatus);
 
-	    try {
-	        boolean updated = appvarificationServiceI.updateVerificationStatus(verificationId, status);
-
-	        if (updated) {
-	            return ResponseEntity.ok("Updated verification status for ID: " + verificationId);
-	        } else {
-	            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-	                    .body("No verification record found for ID: " + verificationId);
-	        }
-	    } catch (EntityNotFoundException e) {
-	        log.error("Error updating verification status: {}", e.getMessage());
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-	}
+	    if (updated) {
+	        return ResponseEntity.ok("Verification status updated successfully.");
+	    } else {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                             .body("Failed to update verification status.");
+	    }
 	}
 	
 	@DeleteMapping("/deleteById/{customerId}")
@@ -131,5 +124,50 @@ public class LoanApplicationVerificationController {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND)
 	                .body("No customer with REJECTED status found for the given ID.");
 	    }
+	}
+	@PutMapping("/updateCustomer/{customerId}")
+	public ResponseEntity<?> updateCustomer(
+	        @PathVariable("customerId") int customerId,
+	        @Valid @RequestPart("customerData") String cusDataJson,
+	        @RequestPart("passportPhoto") MultipartFile passportPhoto,
+	        @RequestPart("addressProof") MultipartFile addressProof,
+	        @RequestPart("panCard") MultipartFile panCard,
+	        @RequestPart("aadharCard") MultipartFile aadharCard,
+	        @RequestPart("incomeTaxCertificate") MultipartFile incomeTaxCertificate,
+	        @RequestPart("salarySlip") MultipartFile salarySlip,
+	        @RequestPart("signaturePhoto") MultipartFile signaturePhoto) {
+	    
+	    try {
+	        log.info("Received request to update customer data for ID: {}", customerId);
+	        
+	        if (cusDataJson == null || cusDataJson.trim().isEmpty()) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer JSON data is missing or empty.");
+	        }
+
+	        // Convert JSON string to Customer object
+	        Customer updatedCustomerData = mapper.readValue(cusDataJson, Customer.class);
+	        log.info("Successfully parsed customer data: {}", updatedCustomerData);
+
+	        // Update customer data with optional documents
+	        Customer updatedCustomer = appvarificationServiceI.updateCustomerData(
+	                customerId, updatedCustomerData, passportPhoto, addressProof, panCard, 
+	                aadharCard, incomeTaxCertificate, salarySlip, signaturePhoto);
+
+	        return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
+	    } catch (IOException e) {
+	        log.error("Error processing customer data JSON or files", e);
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid customer data format.");
+	    } catch (EntityNotFoundException e) {
+	        log.error("Customer not found: {}", e.getMessage());
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	    }
+	}
+	@GetMapping("/getDataByVerificationStatus/{verificationStatus}")
+	public ResponseEntity<List<Customer>> getByStutus(@PathVariable("verificationStatus") VerificationStatus verificationStatus)
+	{
+		log.info("Received request to fetch data By Customer Verification Status.");
+		List<Customer> customer=appvarificationServiceI.getByCustomerStatus(verificationStatus);
+		log.info("Successfully fetched {} Customer Data By Verification Status.",verificationStatus );
+		return new ResponseEntity<List<Customer>>(customer,HttpStatus.OK);	
 	}
 }
