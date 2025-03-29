@@ -159,18 +159,20 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 
 		    verification.setVerificationStatus(newStatus);
 		    varificationRepository.save(verification);
-
-		    if (verification.getCustomer() != null) {
-		        Customer customer = verification.getCustomer();
+		    Customer customer = verification.getCustomer();
+		    if (customer != null) {
+		    	log.info("Sending email to: {}", customer.getEmailId());
 		        email.sendCustomerVerificationStatusUpdate(customer, newStatus);
+		        
 		        log.info("Status update email sent for customer ID: {}", customer.getCustomerId());
+		        
 		    } else {
 		        log.warn("No associated customer found for verification ID: {}", verificationId);
 		    }
 
 		    return true;
 		}
-		
+
 		@Override
 		@Transactional
 		public boolean deleteCustomerByIdAndStatus(int customerId, VerificationStatus status) {

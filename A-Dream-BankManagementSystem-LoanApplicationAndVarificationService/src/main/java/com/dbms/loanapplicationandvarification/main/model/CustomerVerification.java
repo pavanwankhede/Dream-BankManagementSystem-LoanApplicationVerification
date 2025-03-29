@@ -2,7 +2,6 @@ package com.dbms.loanapplicationandvarification.main.model;
 
 import java.sql.Time;
 import java.util.Date;
-
 import com.dbms.loanapplicationandvarification.main.enums.VerificationStatus;
 
 import jakarta.persistence.CascadeType;
