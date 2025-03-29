@@ -125,4 +125,41 @@ public class LoanApplicationVerificationController {
 	                .body("No customer with REJECTED status found for the given ID.");
 	    }
 	}
+	@PutMapping("/updateCustomer/{customerId}")
+	public ResponseEntity<?> updateCustomer(
+	        @PathVariable("customerId") int customerId,
+	        @Valid @RequestPart("customerData") String cusDataJson,
+	        @RequestPart(value = "passportPhoto", required = false) MultipartFile passportPhoto,
+	        @RequestPart(value = "addressProof", required = false) MultipartFile addressProof,
+	        @RequestPart(value = "panCard", required = false) MultipartFile panCard,
+	        @RequestPart(value = "aadharCard", required = false) MultipartFile aadharCard,
+	        @RequestPart(value = "incomeTaxCertificate", required = false) MultipartFile incomeTaxCertificate,
+	        @RequestPart(value = "salarySlip", required = false) MultipartFile salarySlip,
+	        @RequestPart(value = "signaturePhoto", required = false) MultipartFile signaturePhoto) {
+	    
+	    try {
+	        log.info("Received request to update customer data for ID: {}", customerId);
+	        
+	        if (cusDataJson == null || cusDataJson.trim().isEmpty()) {
+	            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Customer JSON data is missing or empty.");
+	        }
+
+	        // Convert JSON string to Customer object
+	        Customer updatedCustomerData = mapper.readValue(cusDataJson, Customer.class);
+	        log.info("Successfully parsed customer data: {}", updatedCustomerData);
+
+	        // Update customer data with optional documents
+	        Customer updatedCustomer = appvarificationServiceI.updateCustomerData(
+	                customerId, updatedCustomerData, passportPhoto, addressProof, panCard, 
+	                aadharCard, incomeTaxCertificate, salarySlip, signaturePhoto);
+
+	        return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
+	    } catch (IOException e) {
+	        log.error("Error processing customer data JSON or files", e);
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid customer data format.");
+	    } catch (EntityNotFoundException e) {
+	        log.error("Customer not found: {}", e.getMessage());
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+	    }
+	}
 }

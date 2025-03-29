@@ -187,5 +187,93 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 		    customerRepository.delete(customer);  // Deletes customer and all related data due to cascading
 		    return true;
 		}
+		@Override
+		public Customer updateCustomerData(
+		        int customerId, Customer updatedCustomerData, 
+		        MultipartFile passportPhoto, MultipartFile addressProof, 
+		        MultipartFile panCard, MultipartFile aadharCard, 
+		        MultipartFile incomeTaxCertificate, MultipartFile salarySlip, 
+		        MultipartFile signaturePhoto) {
 
+		    Optional<Customer> optionalCustomer = customerRepository.findById(customerId);
+		    if (!optionalCustomer.isPresent()) {
+		        throw new EntityNotFoundException("Customer with ID " + customerId + " not found.");
+		    }
+
+		    Customer existingCustomer = optionalCustomer.get();
+
+		    // Update basic details
+		    existingCustomer.setFirstName(updatedCustomerData.getFirstName());
+		    existingCustomer.setLastName(updatedCustomerData.getLastName());
+		    existingCustomer.setEmailId(updatedCustomerData.getEmailId());
+		    existingCustomer.setMobileNo(updatedCustomerData.getMobileNo());
+		    existingCustomer.setDateOfBirth(updatedCustomerData.getDateOfBirth());
+		    existingCustomer.setAge(updatedCustomerData.getAge());
+		    existingCustomer.setGender(updatedCustomerData.getGender());
+		    existingCustomer.setAlternativeMobileNo(updatedCustomerData.getAlternativeMobileNo());
+		    existingCustomer.setTenureInYears(updatedCustomerData.getTenureInYears());
+		    existingCustomer.setTotalLoanRequired(updatedCustomerData.getTotalLoanRequired());
+		    // Update Address Details
+		    if (updatedCustomerData.getCustomerAddress() != null) {
+		        existingCustomer.setCustomerAddress(updatedCustomerData.getCustomerAddress());
+		    }
+
+		    // Update Account Details
+		    if (updatedCustomerData.getAccountDetails() != null) {
+		        existingCustomer.setAccountDetails(updatedCustomerData.getAccountDetails());
+		    }
+
+		    // Update CIBIL Score Details
+		    if (updatedCustomerData.getCibilScore() != null) {
+		        existingCustomer.setCibilScore(updatedCustomerData.getCibilScore());
+		    }
+
+		    // Update Guarantor Details
+		    if (updatedCustomerData.getGuarantorDetails() != null) {
+		        existingCustomer.setGuarantorDetails(updatedCustomerData.getGuarantorDetails());
+		    }
+
+		    // Update Customer Verification Details
+		    if (updatedCustomerData.getCustomerVerification() != null) {
+		        existingCustomer.setCustomerVerification(updatedCustomerData.getCustomerVerification());
+		    }
+
+		    // Update Dependent Info
+		    if (updatedCustomerData.getDependentInfo() != null) {
+		        existingCustomer.setDependentInfo(updatedCustomerData.getDependentInfo());
+		    }
+		    if (updatedCustomerData.getCustomerAddress() != null) {
+		        existingCustomer.setCustomerAddress(updatedCustomerData.getCustomerAddress());
+		    }
+
+		    // Update documents if provided
+		    try {
+		        if (passportPhoto != null && !passportPhoto.isEmpty()) {
+		            existingCustomer.getAllPersonalDocuments().setPassportPhoto(passportPhoto.getBytes());
+		        }
+		        if (addressProof != null && !addressProof.isEmpty()) {
+		            existingCustomer.getAllPersonalDocuments().setAddressProof(addressProof.getBytes());
+		        }
+		        if (panCard != null && !panCard.isEmpty()) {
+		            existingCustomer.getAllPersonalDocuments().setPanCard(panCard.getBytes());
+		        }
+		        if (aadharCard != null && !aadharCard.isEmpty()) {
+		            existingCustomer.getAllPersonalDocuments().setAadharCard(aadharCard.getBytes());
+		        }
+		        if (incomeTaxCertificate != null && !incomeTaxCertificate.isEmpty()) {
+		            existingCustomer.getAllPersonalDocuments().setIncomeTaxCertificate(incomeTaxCertificate.getBytes());
+		        }
+		        if (salarySlip != null && !salarySlip.isEmpty()) {
+		            existingCustomer.getAllPersonalDocuments().setSalarySlip(salarySlip.getBytes());
+		        }
+		        if (signaturePhoto != null && !signaturePhoto.isEmpty()) {
+		            existingCustomer.getAllPersonalDocuments().setSignaturePhoto(signaturePhoto.getBytes());
+		        }
+		    } catch (IOException e) {
+		        throw new RuntimeException("Error processing uploaded documents", e);
+		    }
+
+		    return customerRepository.save(existingCustomer);
+
+}
 }
