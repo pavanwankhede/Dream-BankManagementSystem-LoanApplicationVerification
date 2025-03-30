@@ -153,6 +153,7 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 			return customer.get();
 		}
 		
+		
 		@Override
 		public boolean updateVerificationStatus(int verificationId, VerificationStatus newStatus) {
 		    CustomerVerification verification = varificationRepository.findById(verificationId)
@@ -174,6 +175,7 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 
 		    return true;
 		}
+		
 
 		@Override
 		@Transactional
@@ -189,6 +191,8 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 		    customerRepository.delete(customer);  // Deletes customer and all related data due to cascading
 		    return true;
 		}
+		
+		
 		@Override
 		public Customer updateCustomerData(
 		        int customerId, Customer updatedCustomerData, 

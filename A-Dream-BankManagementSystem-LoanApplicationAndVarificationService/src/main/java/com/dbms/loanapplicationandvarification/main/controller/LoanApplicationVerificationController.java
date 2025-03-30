@@ -80,6 +80,8 @@ public class LoanApplicationVerificationController {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid customer data format.");
 	    }
 }
+	
+	
 	@GetMapping("/GetAllCustomer")
 	public ResponseEntity<List<Customer> >getAllCustomerData(){
 		 log.info("Received request to fetch all Customer Data.");
@@ -87,6 +89,8 @@ public class LoanApplicationVerificationController {
 		 log.info("Successfully fetched {} Customer Data.", list.size());
 		return new ResponseEntity<List<Customer>>(list,HttpStatus.OK);
 	}
+	
+	
 	
 	@GetMapping("/getByCustomerId/{customerId}")
 	public ResponseEntity<Customer> getByCustomerId(@PathVariable("customerId") int id){
@@ -97,6 +101,8 @@ public class LoanApplicationVerificationController {
 		 return new ResponseEntity<Customer>(customer,HttpStatus.OK);
 	   
 	}
+	
+	
 	@PatchMapping("/changeStatus/{verificationId}/{verificationStatus}")
 	public ResponseEntity<String> updateVerificationStatus(
 	        @PathVariable int verificationId,
@@ -112,6 +118,7 @@ public class LoanApplicationVerificationController {
 	    }
 	}
 	
+	
 	@DeleteMapping("/deleteById/{customerId}")
 	public ResponseEntity<String> deleteRejectedApplication(@PathVariable("customerId") int customerId) {
 	    log.info("Request received to delete Customer with ID: {} and status: REJECTED", customerId);
@@ -125,6 +132,8 @@ public class LoanApplicationVerificationController {
 	                .body("No customer with REJECTED status found for the given ID.");
 	    }
 	}
+	
+	
 	@PutMapping("/updateCustomer/{customerId}")
 	public ResponseEntity<?> updateCustomer(
 	        @PathVariable("customerId") int customerId,
@@ -162,6 +171,8 @@ public class LoanApplicationVerificationController {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
 	    }
 	}
+	
+	
 	@GetMapping("/getDataByVerificationStatus/{verificationStatus}")
 	public ResponseEntity<List<Customer>> getByStutus(@PathVariable("verificationStatus") VerificationStatus verificationStatus)
 	{
