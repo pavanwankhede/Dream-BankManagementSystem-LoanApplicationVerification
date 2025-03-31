@@ -178,7 +178,6 @@ public class LoanApplicationVerificationServiceImpl implements LoanApplicationVe
 		
 
 		@Override
-		@Transactional
 		public boolean deleteCustomerByIdAndStatus(int customerId, VerificationStatus status) {
 		    Customer customer = customerRepository.findById(customerId).orElse(null);
 
