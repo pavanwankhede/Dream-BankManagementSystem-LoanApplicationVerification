@@ -40,6 +40,13 @@ public class GlobalExceptions {
 	    ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
 	    return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
 	}
+	
+	
+	@ExceptionHandler(EntityNotFoundException.class)
+	public ResponseEntity<ErrorResponseDTO> handleException(EntityNotFoundException e) {
+	    ErrorResponseDTO errorResponse = new ErrorResponseDTO(e.getMessage());
+	    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+	}
 
 	 @ExceptionHandler(ValidationExceptions.class)
 	    public ResponseEntity<ErrorResponseDTO> handleValidationException(ValidationExceptions ex) {

@@ -105,8 +105,8 @@ public class LoanApplicationVerificationController {
 	
 	@PatchMapping("/changeStatus/{verificationId}/{verificationStatus}")
 	public ResponseEntity<String> updateVerificationStatus(
-	        @PathVariable int verificationId,
-	        @PathVariable VerificationStatus verificationStatus) {
+	        @PathVariable("verificationId") int verificationId,
+	        @PathVariable("verificationStatus") VerificationStatus verificationStatus) {
 
 	    boolean updated = appvarificationServiceI.updateVerificationStatus(verificationId, verificationStatus);
 
