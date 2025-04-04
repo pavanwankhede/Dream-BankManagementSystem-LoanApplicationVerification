@@ -73,25 +73,25 @@ public class Customer {
 	 @NotBlank(message = "Email is required")
     private String emailId;
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     private CustomerAddress customerAddress;
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     private AccountDetails accountDetails;
 
-    @OneToOne(cascade = CascadeType.MERGE,orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     private CibilScore cibilScore;
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     private GuarantorDetails guarantorDetails;
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     private CustomerVerification customerVerification;
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     private DependentInfo dependentInfo;
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL)
     private AllPersonalDocuments allPersonalDocuments;
 	
 		
