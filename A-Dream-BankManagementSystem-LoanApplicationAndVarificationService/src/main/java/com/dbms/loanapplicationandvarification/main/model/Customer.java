@@ -27,7 +27,7 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long customerId;
+    private int customerId;
 
     @NotNull(message = "You Can Not Take The Customer FirstName Is Null !!!")
 	@NotBlank(message = "Customer FirstName Can Not Be Blank")
